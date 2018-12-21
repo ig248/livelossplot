@@ -11,7 +11,8 @@ EXTREMA_INIT_VALUE = {
 
 class PlotLosses():
     def __init__(self, figsize=None, cell_size=(6, 4), dynamic_x_axis=False, max_cols=2,
-                 max_epoch=None, metric2title={}, validation_fmt="val_{}", plot_extrema=True):
+                 max_epoch=None, metric2title={}, validation_fmt="val_{}", plot_extrema=True,
+                 extra_metrics=None):
         self.figsize = figsize
         self.cell_size = cell_size
         self.dynamic_x_axis = dynamic_x_axis
@@ -23,14 +24,18 @@ class PlotLosses():
         self.base_metrics = None
         self.metrics_extrema = None
         self.plot_extrema = plot_extrema
+        self.extra_metrics = extra_metrics
 
         not_inline_warning()
 
     def set_metrics(self, metrics):
-        self.base_metrics = metrics
+        extra_metrics = self.extra_metrics or []
+        if isinstance(extra_metrics, str):
+            extra_metrics = [extra_metrics]
+        self.base_metrics = metrics + extra_metrics
         self.metrics_extrema = {
             ftm.format(metric): EXTREMA_INIT_VALUE
-            for metric in metrics
+            for metric in self.base_metrics
             for ftm in ['{}', self.validation_fmt]
         }
         if self.figsize is None:
