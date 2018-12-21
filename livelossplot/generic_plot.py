@@ -3,6 +3,12 @@ from __future__ import division
 from .core import draw_plot, not_inline_warning
 
 
+EXTREMA_INIT_VALUE = {
+    'min': None,
+    'max': None,
+}
+
+
 class PlotLosses():
     def __init__(self, figsize=None, cell_size=(6, 4), dynamic_x_axis=False, max_cols=2,
                  max_epoch=None, metric2title={}, validation_fmt="val_{}", plot_extrema=True):
@@ -23,10 +29,7 @@ class PlotLosses():
     def set_metrics(self, metrics):
         self.base_metrics = metrics
         self.metrics_extrema = {
-            ftm.format(metric): {
-                'min': None,
-                'max': None,
-            }
+            ftm.format(metric): EXTREMA_INIT_VALUE
             for metric in metrics
             for ftm in ['{}', self.validation_fmt]
         }
@@ -46,7 +49,10 @@ class PlotLosses():
     def _update_extrema(self, log):
         for metric, value in log.items():
             formatted_name = self._format_metric_name(metric)
-            extrema = self.metrics_extrema[formatted_name]
+            extrema = self.metrics_extrema.get(
+                formatted_name,
+                EXTREMA_INIT_VALUE
+            )
             if extrema['min'] is None or value < extrema['min']:
                 extrema['min'] = float(value)
             if extrema['max'] is None or value > extrema['max']:
